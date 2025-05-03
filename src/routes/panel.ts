@@ -54,6 +54,38 @@ export default function panelRouter(
         }
     );
 
+    router.get(
+        '/tables',
+        authenticateToken,
+        async (_req, res) => {
+            try {
+                const tables = await db.getTableNames();
+                res.json(tables);
+            } catch (err) {
+                console.error('Error fetching table names:', err);
+                res.status(500).json({ error: 'Cannot fetch table list' });
+            }
+        }
+    );
+
+    router.get(
+        '/columns',
+        authenticateToken,
+        async(req: Request, res: Response, next: NextFunction): Promise<void> => {
+            try {
+                const tableName = req.query.tableName as string;
+                if (!tableName) {
+                    res.status(400).json({ error: 'Missing tableName parameter' });
+                    return;
+                }
+                const columns = await db.getColumns(tableName);
+                res.status(200).json(columns);
+            } catch(err: any) {
+                console.log(err);
+            }
+        }
+    );
+
     router.post(
         '/add',
         authenticateToken,

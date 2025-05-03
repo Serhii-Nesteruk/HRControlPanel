@@ -18,12 +18,12 @@ const authenticateToken = (req, res, next) => {
         res.status(401).json({ error: 'Missing token' });
         return;
     }
-    jsonwebtoken_1.default.verify(token, config_1.JWT_SECRET, (err, payload) => {
+    jsonwebtoken_1.default.verify(token, config_1.JWT_SECRET, {}, (err, decoded) => {
         if (err) {
             res.status(403).json({ error: 'Token is incorrect' });
             return;
         }
-        req.user = payload;
+        req.user = decoded;
         next();
     });
 };

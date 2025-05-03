@@ -8,56 +8,68 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const path = require("path");
-const express = require("express");
-const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'test';
-module.exports = (db, jwt) => {
-    router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = authRouter;
+// src/routes/auth.ts
+const express_1 = require("express");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const config_1 = require("../config/config");
+function authRouter(db, jwtLib = jsonwebtoken_1.default) {
+    const router = (0, express_1.Router)();
+    router.post('/login', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
         const { username, password } = req.body;
         if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password are required' });
+            res.status(400).json({ error: 'Username and password are required' });
+            return;
         }
         try {
             const success = yield db.shouldToLoginUser(username, password);
-            if (success) {
-                const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
-                res.cookie('token', token, { httpOnly: true, path: '/' });
-                return res.status(200).json({ message: 'Login successful' });
+            if (!success) {
+                res.status(401).json({ error: 'Invalid username or password' });
+                return;
             }
-            else {
-                return res.status(401).json({ error: 'Invalid username or password' });
-            }
+            const token = jwtLib.sign({ username }, config_1.JWT_SECRET, {
+                expiresIn: '1h',
+            });
+            res.cookie('token', token, { httpOnly: true, path: '/' });
+            res.status(200).json({ message: 'Login successful' });
+            return;
         }
         catch (err) {
-            console.error('Login error:', err.message);
-            return res.status(500).json({ error: 'Internal server error' });
+            next(err);
+            return;
         }
     }));
-    router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.post('/register', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
         const { username, email, password } = req.body;
         if (!username || !email || !password) {
-            return res.status(400).json({ error: 'All fields are required' });
+            res.status(400).json({ error: 'All fields are required' });
+            return;
         }
         try {
             const user = yield db.registerUser(username, email, password);
-            if (user) {
-                const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
-                res.cookie('token', token, { httpOnly: true, path: '/' });
-                return res.status(201).json({ message: 'Registration successful' });
+            if (!user) {
+                res.status(400).json({ error: 'User already exists' });
+                return;
             }
-            else {
-                return res.status(400).json({ error: 'User already exists' });
-            }
+            const token = jwtLib.sign({ username }, config_1.JWT_SECRET, {
+                expiresIn: '1h',
+            });
+            res.cookie('token', token, { httpOnly: true, path: '/' });
+            res.status(201).json({ message: 'Registration successful' });
+            return;
         }
         catch (err) {
-            console.error('Registration error:', err.message);
-            return res.status(500).json({ error: 'Internal server error' });
+            next(err);
+            return;
         }
     }));
-    router.get('/logout', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    router.get('/logout', (req, res) => {
         res.clearCookie('token', { path: '/' });
-        return res.redirect('/');
-    }));
+        res.redirect('/');
+    });
     return router;
-};
+}

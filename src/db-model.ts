@@ -5,7 +5,6 @@ import { User } from './config/types';
 
 export default class DBModel {
     private pool: Pool;
-
     constructor(
         dbName: string,
         port: number,
@@ -17,7 +16,7 @@ export default class DBModel {
             user: user || 'postgres',
             host: host || 'localhost',
             database: dbName,
-            password: pass,
+            password: String(pass),
             port: port || 5432,
         });
 
@@ -61,14 +60,27 @@ export default class DBModel {
         }
     }
 
+    public async getColumns<T extends QueryResultRow>(tableName: string): Promise<T[]> {
+        try {
+            const query = `
+             SELECT column_name, data_type
+             FROM information_schema.columns
+             WHERE table_schema = 'public'
+               AND table_name   = $1
+             ORDER BY ordinal_position
+           `;
+            const result: QueryResult<T> = await this.pool.query<T>(query, [tableName]);
+            return result.rows;
+        } catch(err) {
+            console.error(`Failed to get columns of table ${tableName}: `, err);
+            throw new Error(`Failed to get columns of table ${tableName}`);
+        }
+    }
+
+
     public async findAllByTableName<T extends QueryResultRow = any>(
         tableName: string
     ): Promise<T[]> {
-        const allowedTables = ['users'];
-        if (!allowedTables.includes(tableName)) {
-            throw new Error(`Invalid table name: ${tableName}`);
-        }
-
         try {
             const query = `SELECT * FROM ${tableName}`;
             const result: QueryResult<T> = await this.pool.query<T>(query);
@@ -124,7 +136,7 @@ export default class DBModel {
             const hashedPassword = await bcrypt.hash(pass, saltRounds);
 
             const query =
-                'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *';
+                'INSERT INTO users (username, email, pass) VALUES ($1, $2, $3) RETURNING *';
             const result: QueryResult<User> =
                 await this.pool.query<User>(query, [username, email, hashedPassword]);
             return result.rows[0];
@@ -134,20 +146,31 @@ export default class DBModel {
         }
     }
 
+    public async getTableNames(): Promise<string[]> {
+        const query = `
+          SELECT table_name
+          FROM information_schema.tables
+          WHERE table_schema = 'public'
+            AND table_type   = 'BASE TABLE'
+        `;
+        const result = await this.pool.query<{ table_name: string }>(query);
+        return result.rows.map(r => r.table_name);
+    }
+
     public async shouldToLoginUser(
         username: string,
         pass: string
     ): Promise<boolean> {
         try {
-            const query = 'SELECT password FROM users WHERE username = $1';
-            const result: QueryResult<{ password: string }> =
-                await this.pool.query<{ password: string }>(query, [username]);
+            const query = 'SELECT pass FROM users WHERE username = $1';
+            const result: QueryResult<{ pass: string }> =
+                await this.pool.query<{ pass: string }>(query, [username]);
 
             if (result.rows.length === 0) {
                 return false;
             }
 
-            const hashedPassword = result.rows[0].password;
+            const hashedPassword = result.rows[0].pass;
             return bcrypt.compare(pass, hashedPassword);
         } catch (err: any) {
             console.error('Error during login check:', err);
