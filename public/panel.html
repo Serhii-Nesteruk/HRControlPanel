@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-    <!-- Google Fonts -->
+    <title>HR Management Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
@@ -19,129 +18,231 @@
             }
         }
     </script>
-    <!-- Custom Styles -->
     <link rel="stylesheet" href="/css/panel.css">
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="header sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex items-center justify-between">
-                <!-- Logo + Title -->
-                <div class="flex items-center space-x-4">
-                    <span class="logo-title text-2xl">Admin Panel</span>
-                </div>
-                <!-- Search -->
-                <div class="flex-1 mx-6 search-container">
-                    <div class="relative max-w-md mx-auto">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <input type="search" placeholder="Search records..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200"/>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar w-64 bg-white shadow-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-indigo-600">HR Panel</h1>
+            </div>
+            <nav class="mt-6 px-4">
+                <div class="space-y-4">
+                    <div class="nav-section">
+                        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                            Management
+                        </h2>
+                        <a href="#" class="nav-item active">
+                            <i class="fas fa-users mr-3"></i>
+                            Employees
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-briefcase mr-3"></i>
+                            Departments
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-clipboard-list mr-3"></i>
+                            Positions
+                        </a>
+                    </div>
+
+                    <div class="nav-section">
+                        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                            HR Operations
+                        </h2>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-calendar-alt mr-3"></i>
+                            Time Off
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-clock mr-3"></i>
+                            Attendance
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-file-contract mr-3"></i>
+                            Contracts
+                        </a>
+                    </div>
+
+                    <div class="nav-section">
+                        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                            Development
+                        </h2>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-graduation-cap mr-3"></i>
+                            Training
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            Performance
+                        </a>
+                    </div>
+
+                    <div class="nav-section">
+                        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                            Settings
+                        </h2>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-cog mr-3"></i>
+                            General
+                        </a>
+                        <a href="#" class="nav-item">
+                            <i class="fas fa-shield-alt mr-3"></i>
+                            Permissions
+                        </a>
                     </div>
                 </div>
-                <!-- Actions -->
-                <div class="flex items-center space-x-6">
-                    <div class="relative group">
-                        <button class="flex items-center space-x-2">
-                            <img src="/img/avatar.png" alt="Profile" class="h-10 w-10 rounded-full ring-2 ring-white"/>
-                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-500 hover:text-gray-600">
+                            <i class="fas fa-bars text-xl"></i>
                         </button>
-                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-                            <div class="p-2">
-                                <a href="/profile" class="dropdown-item flex items-center space-x-3 px-4 py-2 rounded-md">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span>Profile</span>
-                                </a>
-                                <a href="/api/auth/logout" class="dropdown-item flex items-center space-x-3 px-4 py-2 rounded-md">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
-                                    </svg>
-                                    <span>Logout</span>
-                                </a>
+                        <div class="relative">
+                            <input type="search" 
+                                   placeholder="Search..." 
+                                   class="w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="header-icon">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <div class="relative">
+                            <button class="flex items-center space-x-3">
+                                <img src="https://ui-avatars.com/api/?name=Admin+User" alt="Profile" class="w-8 h-8 rounded-full">
+                                <span class="font-medium text-gray-700">Admin User</span>
+                                <i class="fas fa-chevron-down text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+                <!-- Page Header -->
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
+                    <p class="mt-1 text-sm text-gray-500">Manage your organization's employee information</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-indigo-100 text-indigo-600">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-value">248</h3>
+                            <p class="stat-label">Total Employees</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-green-100 text-green-600">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-value">12</h3>
+                            <p class="stat-label">New This Month</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-yellow-100 text-yellow-600">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h3 class="stat-value">18</h3>
+                            <p class="stat-label">Pending Reviews</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-semibold text-gray-900">Employee List</h2>
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Employee
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="table-header">Employee</th>
+                                    <th class="table-header">Department</th>
+                                    <th class="table-header">Position</th>
+                                    <th class="table-header">Status</th>
+                                    <th class="table-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Sample Data -->
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=John+Doe" alt="">
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">John Doe</div>
+                                                <div class="text-sm text-gray-500">john@example.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="table-cell">Engineering</td>
+                                    <td class="table-cell">Senior Developer</td>
+                                    <td class="table-cell">
+                                        <span class="status-badge status-active">Active</span>
+                                    </td>
+                                    <td class="table-cell">
+                                        <div class="flex space-x-2">
+                                            <button class="action-btn text-blue-600 hover:text-blue-800">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn text-indigo-600 hover:text-indigo-800">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="action-btn text-red-600 hover:text-red-800">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Add more rows as needed -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Showing 1 to 10 of 248 entries
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="pagination-btn">Previous</button>
+                                <button class="pagination-btn active">1</button>
+                                <button class="pagination-btn">2</button>
+                                <button class="pagination-btn">3</button>
+                                <button class="pagination-btn">Next</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow py-8">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Table Selection -->
-            <div class="mb-8 flex flex-wrap items-center gap-4">
-                <label for="tableSelect" class="text-lg font-medium text-gray-700">Select Table:</label>
-                <select id="tableSelect" class="input-field max-w-xs">
-                    <option value="users">Users</option>
-                    <option value="products">Products</option>
-                </select>
-                <button id="addRecordBtn" class="btn btn-primary ml-auto flex items-center space-x-2">
-                    <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Add Record</span>
-                </button>
-            </div>
-
-            <!-- Table -->
-            <div class="table-container">
-                <div class="overflow-x-auto">
-                    <table id="recordsTable" class="w-full">
-                        <thead>
-                            <tr id="tableHeaders"></tr>
-                        </thead>
-                        <tbody id="tableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- View Record Modal -->
-    <div id="viewModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="modal-content max-w-lg w-full mx-4">
-            <div class="modal-header px-6 py-4">
-                <h2 class="text-xl font-bold text-gray-900">Record Details</h2>
-            </div>
-            <div id="viewModalContent" class="p-6"></div>
-            <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end">
-                <button id="closeViewModal" class="btn btn-primary">Close</button>
-            </div>
+            </main>
         </div>
     </div>
 
-    <!-- Add Record Modal -->
-    <div id="addModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="modal-content max-w-lg w-full mx-4">
-            <div class="modal-header px-6 py-4">
-                <h2 class="text-xl font-bold text-gray-900">Add New Record</h2>
-            </div>
-            <form id="addRecordForm" class="p-6 space-y-4">
-                <div id="addFormFields"></div>
-                <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                    <button type="button" id="closeAddModal" class="btn btn-muted">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Record</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-4 mt-auto">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <p class="text-center text-sm text-gray-500">&copy; 2025 Admin Panel. All rights reserved.</p>
-        </div>
-    </footer>
-
-    <!-- JavaScript -->
-    <script src="/js/panel.js"></script>
+    <script src="js/panel.js"></script>
 </body>
 </html>

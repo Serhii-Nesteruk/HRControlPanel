@@ -30,8 +30,8 @@ export default function panelRouter(
             try {
                 const tableName = req.query.tableName as string;
                 const id = Number(req.query.id);
-                // TODO: implement fetching by id
-                const row = await db.delete(tableName, id); // placeholder
+
+                const row = await db.delete(tableName, id);
                 res.status(200).json(row);
             } catch (err: any) {
                 next(err);
@@ -50,6 +50,29 @@ export default function panelRouter(
                 res.status(200).json(deleted);
             } catch (err: any) {
                 next(err);
+            }
+        }
+    );
+
+    router.post(
+        '/edit',
+        authenticateToken,
+        async(req: Request, res: Response): Promise<void> => {
+            try {
+                const table = req.query.tableName as string;
+                const id = Number(req.query.id);
+                const editedColumnName = req.query.editedColumn as string;
+                const editedColumnValue = req.query.newValue as string;
+
+                const result = await db.edit(table, id, editedColumnName, editedColumnValue);
+                if (!result) {
+                    res.status(401).json({ error: 'Failed to edit record' });
+                }
+
+                res.status(200).json(result);
+            } catch (err) {
+
+                console.error('Failed to edit record', err);
             }
         }
     );
@@ -92,17 +115,48 @@ export default function panelRouter(
         async (req: Request, res: Response, next: NextFunction): Promise<void> => {
             try {
                 const tableName = req.query.tableName as string;
-                const record = req.body;
-                // TODO: implement insertion logic
-                const result = await db.execute(
-                    `INSERT INTO ${tableName} ... RETURNING *`
-                );
+                const record = req.body as Record<string, any>;
+
+                const columns = Object.keys(record);
+                if (columns.length === 0) {
+                    res.status(400).json({ error: 'Empty record payload' });
+                    return;
+                }
+
+                const valuesSql = columns.map(col => {
+                    const val = record[col];
+                    if (val === null || val === undefined) {
+                        return 'NULL';
+                    }
+                    switch (typeof val) {
+                        case 'number':
+                            return String(val);
+                        case 'boolean':
+                            return val ? 'TRUE' : 'FALSE';
+                        case 'string':
+
+                            const escaped = val.replace(/'/g, "''");
+                            return `'${escaped}'`;
+                        default:
+                            const json = JSON.stringify(val).replace(/'/g, "''");
+                            return `'${json}'`;
+                    }
+                }).join(', ');
+
+                const sql = `
+                    INSERT INTO ${tableName} (${columns.join(', ')})
+                    VALUES (${valuesSql})
+                        RETURNING *
+                `;
+
+                const result = await db.execute<any>(sql);
                 res.status(201).json(result.rows[0]);
             } catch (err: any) {
                 next(err);
             }
         }
     );
+
 
     return router;
 }

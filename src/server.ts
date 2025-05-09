@@ -28,21 +28,22 @@ async function main(): Promise<void> {
 
     middlewareConfig(app);
 
-    // Routers
     const panelRouter = (await import('./routes/panel')).default(db, authenticateToken);
     app.use('/api/panel', panelRouter);
 
     const authRouter = (await import('./routes/auth')).default(db, jwt);
     app.use('/api/auth', authRouter);
 
-    // Frontend routes
     app.get('/panel', authenticateToken, (_req: Request, res: Response) => {
-        res.sendFile(path.join(__dirname, '..', 'public', 'panel.html'));
+        res.sendFile(path.join(__dirname, 'public', 'panel.html'));
     });
 
     app.get('/profile', authenticateToken, (_req: Request, res: Response) => {
-        res.sendFile(path.join(__dirname, '..', 'public', 'profile.html'));
+        res.sendFile(path.join(__dirname, 'public', 'profile.html'));
     });
+    app.get('/', async(req: Request, res: Response) => {
+        res.sendFile(path.join(__dirname, 'public', 'login.html'));
+    })
 
     app.get('/api/profile', authenticateToken, async (req: Request, res: Response) => {
         const username = req.user!.username;
@@ -50,9 +51,6 @@ async function main(): Promise<void> {
         res.status(200).json({ username: user?.username, email: user?.email });
     });
 
-    app.get('/', (_req: Request, res: Response) => {
-        res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
-    });
 
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);

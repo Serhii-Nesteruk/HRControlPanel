@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_BASE = '/api/panel';
+    const AUTH_API_BASE = '/api/auth';
     const tableSelect = document.getElementById('tableSelect');
     const addRecordBtn = document.getElementById('addRecordBtn');
     const tableHeaders = document.getElementById('tableHeaders');
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch available tables
     async function loadTableList() {
         try {
-            const res = await fetch(`${API_BASE}/tables`, { credentials: 'include' });
+            const res = await fetch(`${API_BASE}/tables`, {credentials: 'include'});
             if (!res.ok) throw new Error(res.statusText);
             const tables = await res.json();
             tableSelect.innerHTML = '';
@@ -70,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(
                 `${API_BASE}/columns?tableName=${encodeURIComponent(table)}`,
-                { credentials: 'include' }
+                {credentials: 'include'}
             );
             if (!res.ok) throw new Error(res.statusText);
             const cols = await res.json();
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(
                 `${API_BASE}/getAll?tableName=${encodeURIComponent(table)}`,
-                { credentials: 'include' }
+                {credentials: 'include'}
             );
             if (!res.ok) throw new Error(`Failed to load ${table}: ${res.status}`);
             let data = await res.json();
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(
                 `${API_BASE}/get?tableName=${encodeURIComponent(table)}&id=${encodeURIComponent(id)}`,
-                { credentials: 'include' }
+                {credentials: 'include'}
             );
             if (!res.ok) throw new Error(`Failed to fetch record: ${res.status}`);
             let record = await res.json();
@@ -152,6 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.values(record).forEach(val => {
                 const td = document.createElement('td');
                 td.textContent = val;
+                td.contentEditable = true;
+                td.spellCheck = false;
                 td.classList.add('px-4', 'py-2');
                 tr.appendChild(td);
             });
@@ -167,12 +170,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const editBtn = document.createElement('button');
             editBtn.textContent = 'Edit';
             editBtn.classList.add('btn-action', 'btn-edit');
-            // TODO: implement edit
+            editBtn.addEventListener('click', async() => {
+                          await editRecord(table, record.id)
+                      })
 
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Delete';
             deleteBtn.classList.add('btn-action', 'btn-delete');
-            // TODO: implement delete
+            deleteBtn.addEventListener('click', async () => {
+                await deleteRecord(table, record.id)
+            });
 
             actionTd.append(viewBtn, editBtn, deleteBtn);
             tr.appendChild(actionTd);
@@ -180,7 +187,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Show "Add New Record" modal with dynamic fields
+      async function editRecord(table, recordId) {
+          // 1. read the headers (minus the "Actions" column)
+          const headers = Array.from(tableHeaders.querySelectorAll('th'))
+              .slice(0, -1)                // drop the last "Actions" column
+              .map(th => th.textContent);
+
+          // 2. find the row whose first column ("id") matches recordId
+          const idIndex = headers.indexOf('id');
+          const rows = Array.from(tableBody.querySelectorAll('tr'));
+          const targetRow = rows.find(row =>
+              row.cells[idIndex].textContent === String(recordId)
+          );
+          if (!targetRow) {
+              return alert(`Could not find row for id=${recordId}`);
+          }
+
+          try {
+              // 3. for each column except "id", send an edit request
+              const updatePromises = headers
+                  .map((col, idx) => ({ col, idx }))
+                  .filter(({ col }) => col !== 'id')
+                  .map(({ col, idx }) => {
+                      const newValue = targetRow.cells[idx].textContent;
+                      const params = new URLSearchParams({
+                          tableName: table,
+                          id: recordId,
+                          editedColumn: col,
+                          newValue,
+                      });
+                      return fetch(`${API_BASE}/edit?${params}`, {
+                          method: 'POST',
+                          credentials: 'include',
+                      });
+                  });
+
+              // 4. wait for every field update
+              const responses = await Promise.all(updatePromises);
+              for (const res of responses) {
+                  if (!res.ok) {
+                      throw new Error(`Update failed: ${res.statusText}`);
+                  }
+              }
+
+              // 5. reload the table so you see the persisted data
+              await loadTable(table);
+              alert('Successfully updated record');
+          } catch (err) {
+              console.error('Error editing record:', err);
+              alert(`Error editing record: ${err.message}`);
+          }
+      }
+
+    async function deleteRecord(table, recordId) {
+        const res = await fetch(
+            `${API_BASE}/delete?tableName=${encodeURIComponent(table)}&id=${recordId}`,
+            {
+                method: 'POST',
+                credentials: 'include'
+            }
+        );
+
+        if (!res.ok) {
+            throw new Error(`Failed to delete record with id ${recordId} from table ${table}: ${res.status}`);
+        }
+
+        await loadTable(table);
+        alert('Saccessfuly deleted');
+
+    }
+
     function openAddModal() {
         addFormFields.innerHTML = '';
         currentColumns
@@ -214,31 +290,63 @@ document.addEventListener('DOMContentLoaded', () => {
         addModal.classList.remove('hidden');
     }
 
-    // Handle adding a new record
+    async function registerNewUser(recordObj) {
+        const {username, email, pass} = recordObj;
+        const password = pass;
+        console.log({username, email, password})
+        const response = await fetch(`${AUTH_API_BASE}/register`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            body: JSON.stringify({username, email, password}),
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            alert(data.message);
+            window.location.href = '/panel';
+        } else {
+            alert(data.error);
+        }
+
+    }
+
+    async function addNewRecord(recordObj) {
+        const table = tableSelect.value;
+        const query = new URLSearchParams({
+            tableName: table
+        });
+        const res = await fetch(`${API_BASE}/add?${query.toString()}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(recordObj)
+        });
+        if (!res.ok) throw new Error(`Failed to add record: ${res.status}`);
+        addModal.classList.add('hidden');
+        addRecordForm.reset();
+        await loadTable(table);
+    }
+
     async function handleAddRecord(e) {
         e.preventDefault();
-        const table = tableSelect.value;
+
         const formData = new FormData(addRecordForm);
         const recordObj = {};
-        formData.forEach((value, key) => (recordObj[key] = value));
-
+        formData.forEach((value, key) => {
+            recordObj[key] = value;
+        });
         try {
-            const query = new URLSearchParams({
-                tableName: table
-            });
-            const res = await fetch(`${API_BASE}/add?${query.toString()}`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(recordObj)
-            });
-            if (!res.ok) throw new Error(`Failed to add record: ${res.status}`);
-            addModal.classList.add('hidden');
-            addRecordForm.reset();
-            await loadTable(table);
+            if (tableSelect.value === 'users') {
+                await registerNewUser(recordObj);
+            } else {
+                await addNewRecord(recordObj);
+            }
         } catch (err) {
-            console.error('Error adding record:', err);
-            alert(`Error adding record: ${err.message}`);
+            console.error('Error :', err);
+            alert(`Error: ${err.message}`);
         }
     }
+
 });

@@ -77,6 +77,22 @@ export default class DBModel {
         }
     }
 
+    public async edit(tableName: string, id: number,    column: string, value: string) {
+        try {
+            const query = `
+              UPDATE "${tableName}"
+              SET "${column}" = $1
+              WHERE id = $2
+              RETURNING *;
+            `;
+            const params = [value, id];
+            const result = await this.pool.query(query, params);
+            return result.rows[0];
+        } catch (err) {
+            console.error(err);
+            throw new Error(`Failed to edit column ${column} from table: ${tableName}`);
+        }
+    }
 
     public async findAllByTableName<T extends QueryResultRow = any>(
         tableName: string

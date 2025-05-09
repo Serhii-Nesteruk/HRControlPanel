@@ -4,10 +4,10 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc && cp -R public dist/public",
+    "build": "tsc && rm -rf dist/public && mkdir -p dist/public && cp -R public/* dist/public",
     "watch": "tsc --watch",
     "dev": "ts-node src/server.ts",
-    "start": "nodemon dist/server.js"
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.2",

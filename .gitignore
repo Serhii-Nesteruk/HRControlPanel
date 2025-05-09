@@ -1,5 +1,8 @@
 .env
-./dist
+/dist
+.idea
+
+.DS_Store
 
 /tmp
 /out-tsc
