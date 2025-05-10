@@ -1,4 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let searchResults = {};
+    let searchTables = [];
+    let currentTableIndex = 0;
+
     const API_BASE = '/api/panel';
     const AUTH_API_BASE = '/api/auth';
     const tableSelect = document.getElementById('tableSelect');
@@ -14,6 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const addRecordForm = document.getElementById('addRecordForm');
 
     let currentColumns = [];
+
+    const searchInput = document.querySelector('input[type="search"]');
+
+    if (searchInput) {
+        searchInput.addEventListener('keydown', async(e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query.length > 0) {
+                    await search(query);
+                } else {
+                    alert('Введіть запит для пошуку');
+                }
+            }
+        });
+    }
 
     // Switch table: reload columns and data
     tableSelect.addEventListener('change', async () => {
@@ -46,6 +66,51 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Initialization error: ' + err.message);
         }
     })();
+
+    async function search(query) {
+        try {
+            const res = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}`, {
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error(res.statusText);
+
+            const results = await res.json();
+
+            if (!Array.isArray(results) || results.length === 0) {
+                alert(`Не знайдено жодного запису по "${query}"`);
+                document.getElementById('searchNav').classList.add('hidden');
+                return;
+            }
+
+            searchResults = {};
+            for (const result of results) {
+                const { table, row } = result;
+                if (!searchResults[table]) searchResults[table] = [];
+                searchResults[table].push(row);
+            }
+
+            searchTables = Object.keys(searchResults);
+            currentTableIndex = 0;
+
+            document.getElementById('searchNav').classList.remove('hidden');
+
+            showCurrentSearchTable();
+        } catch (err) {
+            console.error('Search error:', err);
+            alert(`Failed to find: ${err.message}`);
+        }
+    }
+
+    function showCurrentSearchTable() {
+        if (!searchTables.length) return;
+
+        const table = searchTables[currentTableIndex];
+        const rows = searchResults[table];
+        renderTable(rows, table);
+
+        document.getElementById('searchTableIndicator').textContent =
+            `${currentTableIndex + 1} / ${searchTables.length}: ${table}`;
+    }
 
     // Fetch available tables
     async function loadTableList() {
@@ -179,6 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.classList.add('btn-action', 'btn-delete');
             deleteBtn.addEventListener('click', async () => {
                 await deleteRecord(table, record.id)
+            });
+
+            document.getElementById('prevTableBtn').addEventListener('click', () => {
+                if (currentTableIndex > 0) {
+                    currentTableIndex--;
+                    showCurrentSearchTable();
+                }
+            });
+
+            document.getElementById('nextTableBtn').addEventListener('click', () => {
+                if (currentTableIndex < searchTables.length - 1) {
+                    currentTableIndex++;
+                    showCurrentSearchTable();
+                }
             });
 
             actionTd.append(viewBtn, editBtn, deleteBtn);

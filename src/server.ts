@@ -22,7 +22,9 @@ declare global {
 async function main(): Promise<void> {
     const db = new DBModel('panel', 5432, 'localhost', DB_USER, DB_PASS);
 
-    await sqlExecuter('schema.sql', db, { baseDir: path.resolve(__dirname, '..') });
+    const baseDirObj = { baseDir: path.resolve(__dirname, '..') };
+    await sqlExecuter('schema.sql', db, baseDirObj);
+    await sqlExecuter('mock-data.sql', db, baseDirObj);
 
     const app: Application = express();
 
@@ -34,23 +36,8 @@ async function main(): Promise<void> {
     const authRouter = (await import('./routes/auth')).default(db, jwt);
     app.use('/api/auth', authRouter);
 
-    app.get('/panel', authenticateToken, (_req: Request, res: Response) => {
-        res.sendFile(path.join(__dirname, 'public', 'panel.html'));
-    });
-
-    app.get('/profile', authenticateToken, (_req: Request, res: Response) => {
-        res.sendFile(path.join(__dirname, 'public', 'profile.html'));
-    });
-    app.get('/', async(req: Request, res: Response) => {
-        res.sendFile(path.join(__dirname, 'public', 'login.html'));
-    })
-
-    app.get('/api/profile', authenticateToken, async (req: Request, res: Response) => {
-        const username = req.user!.username;
-        const user = await db.findUserByUsername(username);
-        res.status(200).json({ username: user?.username, email: user?.email });
-    });
-
+    const mainRouter = (await import('./routes/main')).default(db);
+    app.use(mainRouter);
 
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);

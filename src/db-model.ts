@@ -60,6 +60,43 @@ export default class DBModel {
         }
     }
 
+    public async searchAllTables(
+        search: string
+    ): Promise<
+        { table: string; column: string; row: Record<string, any> }[]
+    > {
+        const results: { table: string; column: string; row: Record<string, any> }[] = [];
+
+        const tables = await this.getTableNames();
+
+        for (const table of tables) {
+            const columns = await this.getColumns(table);
+            const textColumns = columns
+                .filter((col: any) =>
+                    ['character varying', 'text', 'varchar', 'char'].includes(col.data_type)
+                )
+                .map((col: any) => col.column_name);
+
+            for (const col of textColumns) {
+                const query = `
+                SELECT * FROM "${table}"
+                WHERE "${col}" ILIKE $1
+            `;
+                const matches = await this.pool.query(query, [`%${search}%`]);
+                for (const row of matches.rows) {
+                    results.push({
+                        table,
+                        column: col,
+                        row,
+                    });
+                }
+            }
+        }
+
+        return results;
+    }
+
+
     public async getColumns<T extends QueryResultRow>(tableName: string): Promise<T[]> {
         try {
             const query = `

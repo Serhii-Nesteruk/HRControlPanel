@@ -24,6 +24,32 @@ export default function panelRouter(
     );
 
     router.get(
+        '/search',
+        authenticateToken,
+        async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            try {
+                const query = req.query.query as string;
+
+                if (!query) {
+                    res.status(400).json({ error: 'search query can`t be empty' });
+                    return;
+                }
+
+                const result = await db.searchAllTables(query);
+
+                if (!result) {
+                    res.status(404).json({error: 'No results found'});
+                    return;
+                }
+
+                res.status(200).json(result);
+            } catch (err: any) {
+                next(err);
+            }
+        }
+    );
+
+    router.get(
         '/get',
         authenticateToken,
         async (req: Request, res: Response, next: NextFunction): Promise<void> => {

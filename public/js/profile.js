@@ -15,14 +15,11 @@ async function fetchProfile() {
         }
 
         const response = await fetch('/api/profile', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            }
+            credentials: 'include'
         });
 
         const data = await response.json();
+        console.log(data);
         if (response.ok) {
             updateProfileUI(data);
         } else {
@@ -35,14 +32,17 @@ async function fetchProfile() {
 
 function updateProfileUI(data) {
     // Update basic info
+    console.log(data.username);
+    console.log(data.email);
+
     document.getElementById('username').textContent = data.username || 'N/A';
     document.getElementById('email').textContent = data.email || 'N/A';
     
     // Update additional info if available
     if (data.role) document.getElementById('role').textContent = data.role;
     if (data.department) document.getElementById('department').textContent = data.department;
-    if (data.phone) document.getElementById('phone').textContent = data.phone;
-    if (data.memberSince) document.getElementById('memberSince').textContent = data.memberSince;
+    // if (data.phone) document.getElementById('phone').textContent = data.phone;
+    // if (data.memberSince) document.getElementById('memberSince').textContent = data.memberSince;
 }
 
 function showError(message) {
@@ -74,16 +74,9 @@ function showError(message) {
     }, 3000);
 }
 
-// Edit Profile Handler
-document.getElementById('editProfileBtn').addEventListener('click', async () => {
-    // Here you would typically show a modal or navigate to an edit page
-    alert('Edit profile functionality will be implemented soon!');
-});
-
-// Initialize
 window.addEventListener('load', fetchProfile);
 
-// Add necessary CSS animations
+
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
