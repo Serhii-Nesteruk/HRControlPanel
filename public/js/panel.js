@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
                           newValue,
                       });
                       return fetch(`${API_BASE}/edit?${params}`, {
-                          method: 'POST',
+                          method: 'PATCH',
                           credentials: 'include',
                       });
                   });
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await fetch(
             `${API_BASE}/delete?tableName=${encodeURIComponent(table)}&id=${recordId}`,
             {
-                method: 'POST',
+                method: 'DELETE',
                 credentials: 'include'
             }
         );

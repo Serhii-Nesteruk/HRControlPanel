@@ -24,7 +24,7 @@ async function main(): Promise<void> {
 
     const baseDirObj = { baseDir: path.resolve(__dirname, '..') };
     await sqlExecuter('schema.sql', db, baseDirObj);
-    await sqlExecuter('mock-data.sql', db, baseDirObj);
+   // await sqlExecuter('mock-data.sql', db, baseDirObj);
 
     const app: Application = express();
 

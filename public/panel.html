@@ -37,7 +37,7 @@
                             <i class="fas fa-users mr-3"></i>
                             Zarządzać bazami danych
                         </a>
-                        <a href="#" class="nav-item">
+                        <a href="#" id="addEmployeeNav" class="nav-item">
                             <i class="fas fa-box mr-3"></i>
                             Dodać pracownika
                         </a>
@@ -151,7 +151,25 @@
         </div>
     </div>
 
+    <!-- Add Employee Wizard Modal -->
+    <div id="employeeWizardModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="modal-content max-w-lg w-full mx-4 bg-white rounded-lg shadow-xl">
+            <div class="modal-header px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 id="employeeWizardTitle" class="text-xl font-bold text-gray-900">Add Employee: Step 1</h2>
+                <button id="closeEmployeeWizard" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div id="employeeWizardBody" class="p-6 space-y-4">
+                <!-- Динамічні поля з’являться тут -->
+            </div>
+            <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-between">
+                <button id="wizardPrevBtn" class="btn btn-secondary hidden">Prev</button>
+                <button id="wizardNextBtn" class="btn btn-primary">Next</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script src="js/panel.js"></script>
+    <script src="js/add-employee.js"></script>
 </body>
 </html>

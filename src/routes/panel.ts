@@ -65,7 +65,7 @@ export default function panelRouter(
         }
     );
 
-    router.post(
+    router.delete(
         '/delete',
         authenticateToken,
         async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -80,7 +80,7 @@ export default function panelRouter(
         }
     );
 
-    router.post(
+    router.patch(
         '/edit',
         authenticateToken,
         async(req: Request, res: Response): Promise<void> => {

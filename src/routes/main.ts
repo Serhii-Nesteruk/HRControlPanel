@@ -17,10 +17,10 @@ export default function mainRouter(
     });
 
     router.get('/', async(req: Request, res: Response) => {
-        if (req.cookies.token) {
+        /*if (req.cookies.token) {
             res.status(400).json({error: 'You already logged in.'})
             return void res.redirect('/profile');
-        }
+        }*/
         res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
     })
 
