@@ -13,6 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeWizardBtn = document.getElementById('closeEmployeeWizard');
     const tableSelect    = document.getElementById('tableSelect');
 
+    const stepLabels = [
+        'Dane konta',               // users
+        'Dane zatrudnienia',        // employment
+        'Profil pracownika',        // employee
+        'Grafik pracy',             // schedules
+        'Dane płatnicze',           // payment_details
+        'Ustawienia wynagrodzenia'  // salaries
+    ];
+
     // Sequence of tables for the wizard
     const tables = [
         'users',
@@ -22,6 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
         'payment_details',
         'salaries'
     ];
+
+    // Days of the week for schedule creation (try different formats)
+    const daysOfWeek = [
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+        'saturday',
+        'sunday'
+    ];
+
+    // Alternative formats in case the above doesn't work
+  //  const daysOfWeekNumbers = [1, 2, 3, 4, 5, 6, 7]; // 1=Monday, 7=Sunday
+//    const daysOfWeekShort = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     // Fetch dynamic columns for a given table
     async function fetchColumns(table) {
@@ -93,6 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     user_id: wizardData.user_id,
                     employment_id: wizardData.employment_id
                 };
+
+                // Debug: Log the payload to see what's being sent
+                console.log('Employee creation payload:', payload);
+                console.log('wizardData:', wizardData);
+                console.log('vals:', vals);
+
                 const res = await fetch(
                     `${API_BASE}/add?tableName=employee`, {
                         method: 'POST',
@@ -101,26 +131,51 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify(payload),
                     }
                 );
-                if (!res.ok) throw new Error('Failed to create employee');
+
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error('Failed to create employee:', errorText);
+                    throw new Error('Failed to create employee: ' + errorText);
+                }
+
                 const rec = await res.json();
-                wizardData.employee_id = rec.id;
+                console.log('Employee creation rec: ' + rec);
             } else if (wizardStep === 3) {
-                // Create schedule
-                const payload = {
-                    ...vals,
-                    employee_id: wizardData.employee_id
-                };
-                const res = await fetch(
-                    `${API_BASE}/add?tableName=schedules`, {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        credentials: 'include',
-                        body: JSON.stringify(payload),
+                // Create schedules - 7 records for each day of the week
+                const schedulePromises = daysOfWeek.map(async (day, index) => {
+                    const payload = {
+                        ...vals,
+                        employee_id: wizardData.employee_id,
+                        day_of_week: day
+                    };
+
+                    // Debug: log the payload
+                    console.log(`Creating schedule for ${day}:`, payload);
+
+                    const res = await fetch(
+                        `${API_BASE}/add?tableName=schedules`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            credentials: 'include',
+                            body: JSON.stringify(payload),
+                        }
+                    );
+
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        console.error(`Failed to create schedule for ${day}:`, errorText);
+                        throw new Error(`Failed to create schedule for ${day}: ${errorText}`);
                     }
-                );
-                if (!res.ok) throw new Error('Failed to create schedule');
-                const rec = await res.json();
-                wizardData.schedule_id = rec.id;
+
+                    return await res.json();
+                });
+
+                // Wait for all 7 schedules to be created
+                const scheduleRecords = await Promise.all(schedulePromises);
+
+                // Store the first schedule ID (you might want to store all IDs if needed)
+                wizardData.schedule_id = scheduleRecords[0].id;
+                wizardData.schedule_ids = scheduleRecords.map(rec => rec.id);
             } else if (wizardStep === 4) {
                 // Create payment details
                 const res = await fetch(
@@ -168,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render form fields for current step
     async function renderWizardStep() {
         const table = tables[wizardStep];
-        empTitle.textContent = `Add Employee: Step ${wizardStep + 1}`;
+        empTitle.textContent = `Add Employee: Step ${wizardStep + 1} — ${stepLabels[wizardStep]}`;
         empBody.innerHTML = '';
 
         let cols = await fetchColumns(table);
@@ -176,11 +231,26 @@ document.addEventListener('DOMContentLoaded', () => {
             users: ['id'],
             employment: ['id'],
             employee: ['id','user_id','employment_id'],
-            schedules: ['id','employee_id'],
+            schedules: ['id','employee_id','day_of_week'], // Exclude day_of_week since we'll add it automatically
             payment_details: ['id'],
             salaries: ['id','employee_id','payment_details_id']
         };
         cols = cols.filter(c => !excludeMap[table].includes(c));
+
+        // Special message for schedules step
+        if (table === 'schedules') {
+            const infoDiv = document.createElement('div');
+            infoDiv.classList.add('bg-blue-50', 'border', 'border-blue-200', 'rounded-md', 'p-3', 'mb-4');
+            infoDiv.innerHTML = `
+                <div class="flex">
+                    <i class="fas fa-info-circle text-blue-500 mr-2 mt-1"></i>
+                    <div class="text-sm text-blue-700">
+                        <strong>Note:</strong> This schedule will be applied to all 7 days of the week automatically.
+                    </div>
+                </div>
+            `;
+            empBody.appendChild(infoDiv);
+        }
 
         cols.forEach(col => {
             const wrapper = document.createElement('div');

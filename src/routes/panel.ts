@@ -134,7 +134,49 @@ export default function panelRouter(
             }
         }
     );
+    router.post(
+        '/add',
+        authenticateToken,
+        async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+            try {
+                const tableName = req.query.tableName as string;
+                const record = req.body as Record<string, any>;
 
+                const columns = Object.keys(record);
+                if (columns.length === 0) {
+                    res.status(400).json({ error: 'Empty record payload' });
+                    return;
+                }
+
+                // Use parameterized queries instead of string concatenation
+                const placeholders = columns.map((_, index) => `$${index + 1}`).join(', ');
+                const values = columns.map(col => {
+                    const val = record[col];
+                    if (val === null || val === undefined || val === '') {
+                        return null;
+                    }
+                    return val;
+                });
+
+                const sql = `
+                INSERT INTO ${tableName} (${columns.join(', ')})
+                VALUES (${placeholders})
+                RETURNING *
+            `;
+
+                console.log('SQL:', sql);
+                console.log('Values:', values);
+                console.log('Record:', record);
+
+                const result = await db.executeWithParams<any>(sql, values);
+                res.status(201).json(result.rows[0]);
+            } catch (err: any) {
+                console.error('Error in /add route:', err);
+                next(err);
+            }
+        }
+    );
+    /*
     router.post(
         '/add',
         authenticateToken,
@@ -181,7 +223,7 @@ export default function panelRouter(
                 next(err);
             }
         }
-    );
+    );*/
 
 
     return router;

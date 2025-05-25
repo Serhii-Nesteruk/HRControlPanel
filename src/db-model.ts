@@ -46,6 +46,23 @@ export default class DBModel {
         }
     }
 
+    public async executeWithParams<T extends QueryResultRow = any>(
+        query: string,
+        params?: any[]
+    ): Promise<QueryResult<T>> {
+        try {
+            if (params) {
+                return await this.pool.query<T>(query, params);
+            } else {
+                return await this.pool.query<T>(query);
+            }
+        } catch (err: any) {
+            console.error(`Error executing query: ${query}`, err.stack);
+            console.error('Query params:', params);
+            throw new Error(`Error executing query: ${query} - ${err.message}`);
+        }
+    }
+
     public async delete<T extends QueryResultRow = any>(
         tableName: string,
         id: number

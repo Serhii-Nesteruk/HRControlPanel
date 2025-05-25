@@ -66,7 +66,10 @@ export default function authRouter(
                     expiresIn: '1h',
                 });
                 res.cookie('token', token, { httpOnly: true, path: '/' });
-                res.status(201).json({ message: 'Registration successful' });
+                res.status(201).json({
+                    message: 'Registration successful',
+                    userId: user.id
+                });
                 return;
             } catch (err: any) {
                 next(err);
