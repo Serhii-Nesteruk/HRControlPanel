@@ -24,14 +24,31 @@ export default function middlewareConfig(app: Application): void {
             contentSecurityPolicy: {
                 useDefaults: true,
                 directives: {
-                    "script-src": ["'self'", "https://cdn.tailwindcss.com"],
+                    "script-src": [
+                        "'self'",
+                        "https://cdn.tailwindcss.com",
+                        "https://fonts.googleapis.com/",
+                        "https://cdnjs.cloudflare.com/",
+                        "https://cdn.tailwindcss.com"
+                    ],
                     "script-src-attr": ["'unsafe-inline'"],
                     "style-src": ["'self'", "'unsafe-inline'"],
+                    "style-src-elem": [
+                        "'self'",
+                        "'unsafe-inline'",
+                        "https://fonts.googleapis.com",
+                        "https://cdnjs.cloudflare.com"
+                    ],
+                    "script-src-elem": [
+                        "'self'",
+                        "'unsafe-inline'",
+                        "https://cdn.tailwindcss.com",
+                        "https://cdnjs.cloudflare.com"
+                    ],
                 },
             },
         })
     );
-
     app.use(
         cors({
             origin: (origin, callback) => {

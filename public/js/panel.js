@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addRecordBtn = document.getElementById('addRecordBtn');
     const tableHeaders = document.getElementById('tableHeaders');
     const tableBody = document.getElementById('tableBody');
-    const viewModal = document.getElementById('viewModal');
-    const viewModalContent = document.getElementById('viewModalContent');
-    const closeViewModal = document.getElementById('closeViewModal');
+    // const viewModal = document.getElementById('viewModal');
+    // const viewModalContent = document.getElementById('viewModalContent');
+    // const closeViewModal = document.getElementById('closeViewModal');
     const addModal = document.getElementById('addModal');
     const closeAddModal = document.getElementById('closeAddModal');
     const addFormFields = document.getElementById('addFormFields');
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Close modals
-    closeViewModal.addEventListener('click', () => viewModal.classList.add('hidden'));
-    closeAddModal.addEventListener('click', () => addModal.classList.add('hidden'));
+    // closeViewModal.addEventListener('click', () => viewModal.classList.add('hidden'));
+    // closeAddModal.addEventListener('click', () => addModal.classList.add('hidden'));
 
     // Handle add form submission
     addRecordForm.addEventListener('submit', handleAddRecord);
@@ -170,27 +170,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Display record details
-    async function viewRecord(table, id) {
-        try {
-            const res = await fetch(
-                `${API_BASE}/get?tableName=${encodeURIComponent(table)}&id=${encodeURIComponent(id)}`,
-                {credentials: 'include'}
-            );
-            if (!res.ok) throw new Error(`Failed to fetch record: ${res.status}`);
-            let record = await res.json();
-            if (typeof record === 'string') record = JSON.parse(record);
-            viewModalContent.innerHTML = '';
-            Object.entries(record).forEach(([key, val]) => {
-                const p = document.createElement('p');
-                p.innerHTML = `<strong>${key}:</strong> ${val}`;
-                viewModalContent.appendChild(p);
-            });
-            viewModal.classList.remove('hidden');
-        } catch (err) {
-            console.error('Error fetching record:', err);
-            alert(`Error fetching record details: ${err.message}`);
-        }
-    }
+    // async function viewRecord(table, id) {
+    //     try {
+    //         const res = await fetch(
+    //             `${API_BASE}/get?tableName=${encodeURIComponent(table)}&id=${encodeURIComponent(id)}`,
+    //             {credentials: 'include'}
+    //         );
+    //         if (!res.ok) throw new Error(`Failed to fetch record: ${res.status}`);
+    //         let record = await res.json();
+    //         if (typeof record === 'string') record = JSON.parse(record);
+    //         viewModalContent.innerHTML = '';
+    //         Object.entries(record).forEach(([key, val]) => {
+    //             const p = document.createElement('p');
+    //             p.innerHTML = `<strong>${key}:</strong> ${val}`;
+    //             viewModalContent.appendChild(p);
+    //         });
+    //         viewModal.classList.remove('hidden');
+    //     } catch (err) {
+    //         console.error('Error fetching record:', err);
+    //         alert(`Error fetching record details: ${err.message}`);
+    //     }
+    // }
 
     // Build table HTML
     function renderTable(data, table) {
@@ -227,21 +227,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const actionTd = document.createElement('td');
             actionTd.classList.add('px-4', 'py-2', 'flex', 'space-x-2');
 
-            const viewBtn = document.createElement('button');
-            viewBtn.textContent = 'View';
-            viewBtn.classList.add('btn-action', 'btn-view');
-            viewBtn.addEventListener('click', () => viewRecord(table, record.id));
+          // const viewBtn = document.createElement('button');
+          // viewBtn.textContent = 'View';
+          // viewBtn.classList.add('btn-action', 'btn-view');
+          // viewBtn.addEventListener('click', () => viewRecord(table, record.id));
 
             const editBtn = document.createElement('button');
-            editBtn.textContent = 'Edit';
-            editBtn.classList.add('btn-action', 'btn-edit');
+            // editBtn.textContent = 'Edit';
+            // editBtn.classList.add('btn-action', 'btn-edit');
+            editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.classList.add('btn-action', 'btn-edit', 'p-2', 'text-blue-600', 'hover:text-blue-800', 'hover:bg-blue-50', 'rounded');
+            editBtn.title = 'Edit';
             editBtn.addEventListener('click', async() => {
                           await editRecord(table, record.id)
                       })
 
             const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'Delete';
-            deleteBtn.classList.add('btn-action', 'btn-delete');
+            // deleteBtn.textContent = 'Delete';
+            // deleteBtn.classList.add('btn-action', 'btn-delete');
+
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.classList.add('btn-action', 'btn-delete', 'p-2', 'text-red-600', 'hover:text-red-800', 'hover:bg-red-50', 'rounded');
+            deleteBtn.title = 'Delete';
             deleteBtn.addEventListener('click', async () => {
                 await deleteRecord(table, record.id)
             });
@@ -260,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            actionTd.append(viewBtn, editBtn, deleteBtn);
+            actionTd.append(editBtn, deleteBtn);
             tr.appendChild(actionTd);
             tableBody.appendChild(tr);
         });

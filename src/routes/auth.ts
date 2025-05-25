@@ -74,8 +74,8 @@ export default function authRouter(
             }
         }
     );
-
-    router.post('/logout', (req: Request, res: Response): void => {
+    // TODO: it should be POST instead of GET
+    router.get('/logout', (req: Request, res: Response): void => {
         res.clearCookie('token', { path: '/' });
         res.redirect('/');
     });

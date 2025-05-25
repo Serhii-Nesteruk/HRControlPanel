@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS employee (
 CREATE TABLE IF NOT EXISTS schedules (
                                          id SERIAL PRIMARY KEY,
                                          employee_id INTEGER REFERENCES employee(id) ON DELETE CASCADE,
-    date DATE NOT NULL,
+    day_of_week VARCHAR(20) NOT NULL CHECK (day_of_week IN ('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')),
     start_time TIME NOT NULL,
     finish_time TIME NOT NULL,
     CHECK (finish_time > start_time)

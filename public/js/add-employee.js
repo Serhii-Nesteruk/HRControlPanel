@@ -211,4 +211,3 @@ document.addEventListener('DOMContentLoaded', () => {
         nextBtn.textContent = wizardStep === tables.length - 1 ? 'Finish' : 'Next';
     }
 });
-npm

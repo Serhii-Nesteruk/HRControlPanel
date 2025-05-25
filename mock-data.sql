@@ -3,32 +3,35 @@
 --   Insert test records if they don't already exist
 -- ========================================
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -------------------------
 -- USERS (6 записів)
 -------------------------
 INSERT INTO users (username, email, pass)
-SELECT 'user1', 'user1@example.com', 'hashed_password_1'
+SELECT 'user1', 'user1@example.com', crypt('password123', gen_salt('bf'))
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user1');
 
 INSERT INTO users (username, email, pass)
-SELECT 'user2', 'user2@example.com', 'hashed_password_2'
+SELECT 'user2', 'user2@example.com', crypt('password123', gen_salt('bf'))
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user2');
 
 INSERT INTO users (username, email, pass)
-SELECT 'user3', 'user3@example.com', 'hashed_password_3'
+SELECT 'user3', 'user3@example.com', crypt('password123', gen_salt('bf'))
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user3');
 
 INSERT INTO users (username, email, pass)
-SELECT 'user4', 'user4@example.com', 'hashed_password_4'
+SELECT 'user4', 'user4@example.com', crypt('password123', gen_salt('bf'))
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user4');
 
 INSERT INTO users (username, email, pass)
-SELECT 'user5', 'user5@example.com', 'hashed_password_5'
+SELECT 'user5', 'user5@example.com', crypt('password123', gen_salt('bf'))
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user5');
 
 INSERT INTO users (username, email, pass)
-SELECT 'user6', 'user6@example.com', 'hashed_password_6'
+SELECT 'user6', 'user6@example.com', crypt('password123', gen_salt('bf'))
     WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'user6');
+
 
 -------------------------
 -- EMPLOYMENT (6 записів)
@@ -124,52 +127,52 @@ WHERE u.username = 'user6'
 -------------------------
 -- SCHEDULES (6 записів, по одному на кожного співробітника)
 -------------------------
-INSERT INTO schedules (employee_id, date, start_time, finish_time)
-SELECT e.id, '2024-07-10', '09:00', '17:00'
+INSERT INTO schedules (employee_id, day_of_week, start_time, finish_time)
+SELECT e.id, 'monday', '09:00', '17:00'
 FROM employee e
 WHERE e.id = 1
   AND NOT EXISTS (
-    SELECT 1 FROM schedules WHERE employee_id = e.id AND date = '2024-07-10'
+    SELECT 1 FROM schedules WHERE employee_id = e.id AND day_of_week = 'monday'
 );
 
-INSERT INTO schedules (employee_id, date, start_time, finish_time)
-SELECT e.id, '2024-07-11', '10:00', '18:00'
+INSERT INTO schedules (employee_id, day_of_week, start_time, finish_time)
+SELECT e.id, 'tuesday', '10:00', '18:00'
 FROM employee e
 WHERE e.id = 2
   AND NOT EXISTS (
-    SELECT 1 FROM schedules WHERE employee_id = e.id AND date = '2024-07-11'
+    SELECT 1 FROM schedules WHERE employee_id = e.id AND day_of_week = 'tuesday'
 );
 
-INSERT INTO schedules (employee_id, date, start_time, finish_time)
-SELECT e.id, '2024-07-12', '08:30', '16:30'
+INSERT INTO schedules (employee_id, day_of_week, start_time, finish_time)
+SELECT e.id, 'wednesday', '08:30', '16:30'
 FROM employee e
 WHERE e.id = 3
   AND NOT EXISTS (
-    SELECT 1 FROM schedules WHERE employee_id = e.id AND date = '2024-07-12'
+    SELECT 1 FROM schedules WHERE employee_id = e.id AND day_of_week = 'wednesday'
 );
 
-INSERT INTO schedules (employee_id, date, start_time, finish_time)
-SELECT e.id, '2024-07-13', '09:15', '17:15'
+INSERT INTO schedules (employee_id, day_of_week, start_time, finish_time)
+SELECT e.id, 'thursday', '09:15', '17:15'
 FROM employee e
 WHERE e.id = 4
   AND NOT EXISTS (
-    SELECT 1 FROM schedules WHERE employee_id = e.id AND date = '2024-07-13'
+    SELECT 1 FROM schedules WHERE employee_id = e.id AND day_of_week = 'thursday'
 );
 
-INSERT INTO schedules (employee_id, date, start_time, finish_time)
-SELECT e.id, '2024-07-14', '09:30', '17:30'
+INSERT INTO schedules (employee_id, day_of_week, start_time, finish_time)
+SELECT e.id, 'friday', '09:30', '17:30'
 FROM employee e
 WHERE e.id = 5
   AND NOT EXISTS (
-    SELECT 1 FROM schedules WHERE employee_id = e.id AND date = '2024-07-14'
+    SELECT 1 FROM schedules WHERE employee_id = e.id AND day_of_week = 'friday'
 );
 
-INSERT INTO schedules (employee_id, date, start_time, finish_time)
-SELECT e.id, '2024-07-15', '10:00', '18:00'
+INSERT INTO schedules (employee_id, day_of_week, start_time, finish_time)
+SELECT e.id, 'saturday', '10:00', '18:00'
 FROM employee e
 WHERE e.id = 6
   AND NOT EXISTS (
-    SELECT 1 FROM schedules WHERE employee_id = e.id AND date = '2024-07-15'
+    SELECT 1 FROM schedules WHERE employee_id = e.id AND day_of_week = 'saturday'
 );
 
 -------------------------
@@ -212,7 +215,7 @@ SELECT 'User Six', '6666777788889999', 3300.00
 );
 
 -------------------------
--- SALARIES (6 записів) — пов’язуємо співробітників з їх реквізитами для оплати
+-- SALARIES (6 записів) — пов'язуємо співробітників з їх реквізитами для оплати
 -------------------------
 INSERT INTO salaries (employee_id, gross_amount, payment_details_id, payout_date, type, last_withdrawal_status)
 SELECT e.id, 3000.00, pd.id, '2024-07-01', 'monthly', 'paid'
